@@ -1,0 +1,537 @@
+---
+title: "Epilepsy - GP and Obesity"
+author: "Albert"
+date: "27/06/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r data}
+library(leaflet)
+library(SpatialEpi)
+library(spdep)
+library(spatialreg)
+library(ggplot2)
+library(tmap)
+library(sf)
+library(dplyr)
+library(MASS)
+library(INLA)
+load('~/EpilepsyAdmissions/mydata1.rda')
+LGASz <- LGASz[LGASz$State=="VIC",]
+LGASz <- LGASz[!st_is_empty(LGASz),]
+LGASz$SzPublic_Number <- (LGASz$SzPublic/100000)*LGASz$Population
+#LGASz<- na.omit(LGASz, cols = c("SzPublic_Number", "Population")) #c
+LGASz <- LGASz[!is.na(LGASz$SzPublic),]
+LGASz <- LGASz[!is.na(LGASz$Population),]
+LGASz <- LGASz[!is.na(LGASz$GP100000),]
+LGASz <- LGASz[!is.na(LGASz$Obese),]
+rate<-sum(LGASz$SzPublic_Number)/sum(LGASz$Population) #c
+
+LGASz$Expected<-with(LGASz, Population*rate )
+LGASz$SMR<-with(LGASz, SzPublic_Number/Expected)
+LGA.nb<-poly2nb(LGASz)
+is.symmetric.nb(LGA.nb)
+```
+
+###GP
+``` {r Spatial Regression GP}
+
+tm_shape(LGASz) + tm_polygons(col='SMR',title='Epilepsy')
+ggplot(data=LGASz,aes(x=GP100000,y=SzPublic)) + geom_point() + geom_smooth(method='lm',col='darkblue',fill='blue') + geom_smooth(method='rlm',col='darkred',fill='red')
+
+LGASz$resids <- rlm(SzPublic_Number~GP100000,data=LGASz)$res
+
+#This shows a map of the residuals
+tm_shape(LGASz) + tm_polygons(col='resids',title='Residuals')+tm_style("col_blind")
+
+#Creates spatial weights for neighbour lists
+r.id<-attr(LGASz,"region.id")
+lw <- nb2listw(LGA.nb,zero.policy = TRUE) #W=row standardised
+
+#We use the Moran I test to see if the pattern of Epilepsy Admissions across Victoria is clustered or random.
+gm<-moran.test(LGASz$SMR,listw = lw , na.action = na.omit, zero.policy = T)
+gm
+
+#local test of autocorrelation
+lm<-localmoran(LGASz$SMR,listw = nb2listw(LGA.nb, zero.policy = TRUE, style = "C") , na.action = na.omit, zero.policy = T)
+
+#Ordinary Least Squares. This takes into account the explanatory variable values of the LGA.
+fit.ols<-lm(SMR~GP100000, data=LGASz, listw=lw,zero.policy=T, type="lag", method="spam")
+summary(fit.ols)
+
+#SAR - The Spatial Lag Model. This takes into account the number of Epilepsy Admissions of neighbours and the explanatory variable values of the LGA itself.
+fit.lag<-lagsarlm(SMR~GP100000,data=LGASz, listw=lw,zero.policy=T, type="lag", method="spam")
+summary(fit.lag, Nagelkerke=T)
+
+#The Spatial Durbin Model. This takes into account the number of Epilepsy Admissions of neighbours and explanatory variable values of neighbours and the LGA itself.
+fit.durb<-lagsarlm(SMR~GP100000,data=LGASz, listw=lw,zero.policy=T, type="mixed", method="spam")
+summary(fit.durb, Nagelkerke=T)
+
+#The Spatial Error Model. This takes into account explanatory variable values of the LGA itself, as well as the residuals of the neighbours.
+fit.errdurb<-errorsarlm(SMR~GP100000, data=LGASz, listw=lw,zero.policy=T,etype="emixed", method="spam")
+summary(fit.errdurb, Nagelkerke=T)
+
+#The SAC or Manski Model. This takes into account the number of Epilepsy Admissions of neighbours, explanatory variable values of neighbours and the LGA itself, as well as the residuals of the neighbours.
+fit.sac<-sacsarlm(SMR~GP100000,data=LGASz, listw=lw,zero.policy=T, type="sac", method = "MC") 
+summary(fit.sac, Nagelkerke=T)
+
+```
+
+``` {r INLA GP}
+nb2INLA("LGA.graph", LGA.nb)
+#This create a file called ``LDN-INLA.adj'' with the graph for INLA
+LGA.adj <- paste(getwd(),"/LGA.graph",sep="")
+#xpoisson model with no random latent effect-ideal baseline model
+#Only Fixed Effects
+m1<-inla(SzPublic_Number~ 1+GP100000, data=LGASz, family="xpoisson",
+         E=LGASz$Expected,control.predictor = list(compute = TRUE),
+         control.compute = list(dic = TRUE, waic = TRUE), verbose=TRUE)
+R1<-summary(m1) 
+
+LGASz$ID <- 1:nrow(LGASz)
+#Both Fixed Effects and Random Effects
+m2<-inla(SzPublic_Number~ 1+ GP100000 +f(ID, model = "iid"), data=LGASz, family="xpoisson",
+         E=LGASz$Expected,control.predictor = list(compute = TRUE),
+         control.compute = list(dic = TRUE, waic = TRUE) )
+R2<-summary(m2)
+LGASz$FIXED.EFF <- m1$summary.fitted[, "mean"]
+LGASz$IID.EFF <- m2$summary.fitted[, "mean"]  
+#plot regression on map
+tFIXED<-tm_shape(LGASz)+tm_polygons("FIXED.EFF")
+tIID<-tm_shape(LGASz)+tm_polygons("IID.EFF")
+
+# Create sparse adjacency matrix
+LGA.mat <- as(nb2mat(LGA.nb, style = "B",zero.policy = TRUE), "Matrix") #S=variance stabilise
+# Fit model
+#Takes into account neighbouring values. 
+m.icar <- inla(SzPublic_Number ~ 1+GP100000+   
+                 f(ID, model = "besag", graph = LGA.mat),
+               data = LGASz, E = LGASz$Expected, family ="xpoisson",
+               control.predictor = list(compute = TRUE),
+               control.compute = list(dic = TRUE, waic = TRUE))
+R3<-summary(m.icar) 
+
+
+
+#Extension of Besag. Takes into account both neighbouring values as well as random effects
+m.bym = inla(SzPublic_Number ~ -1+ GP100000+   
+               f(ID, model = "bym", graph = LGA.mat),
+             data = LGASz, E = LGASz$Expected, family ="xpoisson",
+             control.predictor = list(compute = TRUE),
+             control.compute = list(dic = TRUE, waic = TRUE))
+R4<-summary(m.bym) 
+
+ICARmatrix <- Diagonal(nrow(LGA.mat), apply(LGA.mat, 1, sum)) - LGA.mat
+Cmatrix <- Diagonal(nrow(LGASz), 1) -  ICARmatrix
+max(eigen(Cmatrix)$values)
+
+
+m.ler = inla(SzPublic_Number ~ -1+GP100000+ 
+               f(ID, model = "generic1", Cmatrix = Cmatrix),
+             data = LGASz, E = LGASz$Expected, family ="xpoisson",
+             control.predictor = list(compute = TRUE),
+             control.compute = list(dic = TRUE, waic = TRUE))
+R5<-summary(m.ler)
+
+
+#X
+mmatrix <- model.matrix(SzPublic_Number ~ 1, LGASz)
+#W
+W <- as(nb2mat(LGA.nb, style = "W", zero.policy = TRUE), "Matrix")
+#Q
+Q.beta = Diagonal(n = ncol(mmatrix), x = 0.001)
+#Range of rho
+rho.min<- -1
+rho.max<- 1
+#Arguments for 'slm'
+args.slm = list(
+  rho.min = rho.min ,
+  rho.max = rho.max,
+  W = W,
+  X = mmatrix,
+  Q.beta = Q.beta
+)
+#Prior on rho
+hyper.slm = list(
+  prec = list(
+    prior = "loggamma", param = c(0.01, 0.01)),
+  rho = list(initial=0, prior = "logitbeta", param = c(1,1))
+)
+#Spatial Lag Model.
+m.slm <- inla( SzPublic_Number ~ -1+GP100000+
+                 f(ID, model = "slm", args.slm = args.slm, hyper = hyper.slm),
+               data = LGASz, family = "xpoisson",
+               E = LGASz$Expected,
+               control.predictor = list(compute = TRUE),
+               control.compute = list(dic = TRUE, waic = TRUE)
+)
+R6<-summary(m.slm)
+marg.rho.internal <- m.slm$marginals.hyperpar[["Rho for ID"]]
+marg.rho <- inla.tmarginal( function(x) {
+  rho.min + x * (rho.max - rho.min)
+}, marg.rho.internal)
+inla.zmarginal(marg.rho, FALSE)
+plot(marg.rho, type = "l", main = "Spatial autocorrelation")
+
+
+
+LGASz$ICAR <- m.icar$summary.fitted.values[, "mean"]
+LGASz$BYM <- m.bym$summary.fitted.values[, "mean"]
+LGASz$LEROUX <- m.ler$summary.fitted.values[, "mean"]
+LGASz$SLM <- m.slm$summary.fitted.values[, "mean"]
+labels<-c("Fixed","IID", "ICAR","BYM","LEROUX","SLM")
+Marginal_Likelihood<-c(R1$mlik[1],R2$mlik[1],R3$mlik[1],R4$mlik[1],R5$mlik[1],R6$mlik[1])
+Marginal_Likelihood<-round(Marginal_Likelihood,2)
+WAIC<-c(R1$waic[[1]],R2$waic[[1]],R3$waic[[1]],R4$waic[[1]],R5$waic[[1]],R6$waic[[1]])
+WAIC<-round(WAIC,2)
+DIC<-c(R1$dic[[1]],R2$dic[[1]],R3$dic[[1]],R4$dic[[1]],R5$dic[[1]],R6$dic[[1]])
+DIC<-round(DIC,2)
+Results<-data.frame(labels,Marginal_Likelihood,WAIC,DIC)
+knitr::kable(Results)
+#plot maps
+tICAR<-tm_shape(LGASz)+tm_polygons("ICAR")
+tBYM<-tm_shape(LGASz)+tm_polygons("BYM")
+tLEROUX<-tm_shape(LGASz)+tm_polygons("LEROUX")
+tSLM<-tm_shape(LGASz)+tm_polygons("SLM")
+#arrange in grid using tmap arrange
+current.mode <- tmap_mode("plot")
+tmap_arrange(tFIXED,tIID,tICAR,tBYM,tLEROUX,tSLM)
+tmap_mode(current.mode)
+
+
+```
+
+###Obesity
+``` {r Spatial Regression Obesity}
+
+tm_shape(LGASz) + tm_polygons(col='SMR',title='Epilepsy')
+ggplot(data=LGASz,aes(x=Obese,y=SzPublic)) + geom_point() + geom_smooth(method='lm',col='darkblue',fill='blue') + geom_smooth(method='rlm',col='darkred',fill='red')
+
+LGASz$resids <- rlm(SzPublic_Number~Obese,data=LGASz)$res
+
+#This shows a map of the residuals
+tm_shape(LGASz) + tm_polygons(col='resids',title='Residuals')+tm_style("col_blind")
+
+#Creates spatial weights for neighbour lists
+r.id<-attr(LGASz,"region.id")
+lw <- nb2listw(LGA.nb,zero.policy = TRUE) #W=row standardised
+
+#We use the Moran I test to see if the pattern of Epilepsy Admissions across Victoria is clustered or random.
+gm<-moran.test(LGASz$SMR,listw = lw , na.action = na.omit, zero.policy = T)
+gm
+
+#local test of autocorrelation
+lm<-localmoran(LGASz$SMR,listw = nb2listw(LGA.nb, zero.policy = TRUE, style = "C") , na.action = na.omit, zero.policy = T)
+
+#Ordinary Least Squares. This takes into account the explanatory variable values of the LGA.
+fit.ols<-lm(SMR~Obese, data=LGASz, listw=lw,zero.policy=T, type="lag", method="spam")
+summary(fit.ols)
+
+#SAR - The Spatial Lag Model. This takes into account the number of Epilepsy Admissions of neighbours and the explanatory variable values of the LGA itself.
+fit.lag<-lagsarlm(SMR~Obese,data=LGASz, listw=lw,zero.policy=T, type="lag", method="spam")
+summary(fit.lag, Nagelkerke=T)
+
+#The Spatial Durbin Model. This takes into account the number of Epilepsy Admissions of neighbours and explanatory variable values of neighbours and the LGA itself.
+fit.durb<-lagsarlm(SMR~Obese,data=LGASz, listw=lw,zero.policy=T, type="mixed", method="spam")
+summary(fit.durb, Nagelkerke=T)
+
+#The Spatial Error Model. This takes into account explanatory variable values of the LGA itself, as well as the residuals of the neighbours.
+fit.errdurb<-errorsarlm(SMR~Obese, data=LGASz, listw=lw,zero.policy=T,etype="emixed", method="spam")
+summary(fit.errdurb, Nagelkerke=T)
+
+#The SAC or Manski Model. This takes into account the number of Epilepsy Admissions of neighbours, explanatory variable values of neighbours and the LGA itself, as well as the residuals of the neighbours.
+fit.sac<-sacsarlm(SMR~Obese,data=LGASz, listw=lw,zero.policy=T, type="sac", method = "MC") 
+summary(fit.sac, Nagelkerke=T)
+
+
+```
+
+``` {r INLA Obesity}
+nb2INLA("LGA.graph", LGA.nb)
+#This create a file called ``LDN-INLA.adj'' with the graph for INLA
+LGA.adj <- paste(getwd(),"/LGA.graph",sep="")
+#xpoisson model with no random latent effect-ideal baseline model
+m1<-inla(SzPublic_Number~ 1+Obese, data=LGASz, family="xpoisson",
+         E=LGASz$Expected,control.predictor = list(compute = TRUE),
+         control.compute = list(dic = TRUE, waic = TRUE), verbose=TRUE)
+R1<-summary(m1) #
+
+LGASz$ID <- 1:nrow(LGASz)
+m2<-inla(SzPublic_Number~ 1+ Obese +f(ID, model = "iid"), data=LGASz, family="xpoisson",
+         E=LGASz$Expected,control.predictor = list(compute = TRUE),
+         control.compute = list(dic = TRUE, waic = TRUE) )
+R2<-summary(m2)
+LGASz$FIXED.EFF <- m1$summary.fitted[, "mean"]
+LGASz$IID.EFF <- m2$summary.fitted[, "mean"]
+#plot regression on map
+tFIXED<-tm_shape(LGASz)+tm_polygons("FIXED.EFF")
+tIID<-tm_shape(LGASz)+tm_polygons("IID.EFF")
+
+# Create sparse adjacency matrix
+LGA.mat <- as(nb2mat(LGA.nb, style = "B",zero.policy = TRUE), "Matrix") #S=variance stabilise
+# Fit model
+m.icar <- inla(SzPublic_Number ~ 1+Obese+   
+                 f(ID, model = "besag", graph = LGA.mat),
+               data = LGASz, E = LGASz$Expected, family ="xpoisson",
+               control.predictor = list(compute = TRUE),
+               control.compute = list(dic = TRUE, waic = TRUE))
+R3<-summary(m.icar)
+
+
+
+
+m.bym = inla(SzPublic_Number ~ -1+ Obese+   
+               f(ID, model = "bym", graph = LGA.mat),
+             data = LGASz, E = LGASz$Expected, family ="xpoisson",
+             control.predictor = list(compute = TRUE),
+             control.compute = list(dic = TRUE, waic = TRUE))
+R4<-summary(m.bym)
+
+ICARmatrix <- Diagonal(nrow(LGA.mat), apply(LGA.mat, 1, sum)) - LGA.mat
+Cmatrix <- Diagonal(nrow(LGASz), 1) -  ICARmatrix
+max(eigen(Cmatrix)$values)
+m.ler = inla(SzPublic_Number ~ -1+Obese+ 
+               f(ID, model = "generic1", Cmatrix = Cmatrix),
+             data = LGASz, E = LGASz$Expected, family ="xpoisson",
+             control.predictor = list(compute = TRUE),
+             control.compute = list(dic = TRUE, waic = TRUE))
+R5<-summary(m.ler)
+
+
+#X
+mmatrix <- model.matrix(SzPublic_Number ~ 1, LGASz)
+#W
+W <- as(nb2mat(LGA.nb, style = "W", zero.policy = TRUE), "Matrix")
+#Q
+Q.beta = Diagonal(n = ncol(mmatrix), x = 0.001)
+#Range of rho
+rho.min<- -1
+rho.max<- 1
+#Arguments for 'slm'
+args.slm = list(
+  rho.min = rho.min ,
+  rho.max = rho.max,
+  W = W,
+  X = mmatrix,
+  Q.beta = Q.beta
+)
+#Prior on rho
+hyper.slm = list(
+  prec = list(
+    prior = "loggamma", param = c(0.01, 0.01)),
+  rho = list(initial=0, prior = "logitbeta", param = c(1,1))
+)
+#SLM model
+m.slm <- inla( SzPublic_Number ~ -1+Obese+
+                 f(ID, model = "slm", args.slm = args.slm, hyper = hyper.slm),
+               data = LGASz, family = "xpoisson",
+               E = LGASz$Expected,
+               control.predictor = list(compute = TRUE),
+               control.compute = list(dic = TRUE, waic = TRUE)
+)
+R6<-summary(m.slm)
+marg.rho.internal <- m.slm$marginals.hyperpar[["Rho for ID"]]
+marg.rho <- inla.tmarginal( function(x) {
+  rho.min + x * (rho.max - rho.min)
+}, marg.rho.internal)
+inla.zmarginal(marg.rho, FALSE)
+plot(marg.rho, type = "l", main = "Spatial autocorrelation")
+
+
+
+LGASz$ICAR <- m.icar$summary.fitted.values[, "mean"]
+LGASz$BYM <- m.bym$summary.fitted.values[, "mean"]
+LGASz$LEROUX <- m.ler$summary.fitted.values[, "mean"]
+LGASz$SLM <- m.slm$summary.fitted.values[, "mean"]
+labels<-c("Fixed","IID", "ICAR","BYM","LEROUX","SLM")
+Marginal_Likelihood<-c(R1$mlik[1],R2$mlik[1],R3$mlik[1],R4$mlik[1],R5$mlik[1],R6$mlik[1])
+Marginal_Likelihood<-round(Marginal_Likelihood,2)
+WAIC<-c(R1$waic[[1]],R2$waic[[1]],R3$waic[[1]],R4$waic[[1]],R5$waic[[1]],R6$waic[[1]])
+WAIC<-round(WAIC,2)
+DIC<-c(R1$dic[[1]],R2$dic[[1]],R3$dic[[1]],R4$dic[[1]],R5$dic[[1]],R6$dic[[1]])
+DIC<-round(DIC,2)
+Results<-data.frame(labels,Marginal_Likelihood,WAIC,DIC)
+knitr::kable(Results)
+#plot maps
+tICAR<-tm_shape(LGASz)+tm_polygons("ICAR")
+tBYM<-tm_shape(LGASz)+tm_polygons("BYM")
+tLEROUX<-tm_shape(LGASz)+tm_polygons("LEROUX")
+tSLM<-tm_shape(LGASz)+tm_polygons("SLM")
+#arrange in grid using tmap arrange
+current.mode <- tmap_mode("plot")
+tmap_arrange(tFIXED,tIID,tICAR,tBYM,tLEROUX,tSLM)
+tmap_mode(current.mode)
+```
+
+
+###GP and Obesity
+``` {r Spatial Regression GP and Obesity}
+
+LGASz$resids <- rlm(SzPublic_Number~GP100000+Obese,data=LGASz)$res
+
+#This shows a map of the residuals
+tm_shape(LGASz) + tm_polygons(col='resids',title='Residuals')+tm_style("col_blind")
+
+#Creates spatial weights for neighbour lists
+r.id<-attr(LGASz,"region.id")
+lw <- nb2listw(LGA.nb,zero.policy = TRUE) #W=row standardised
+
+#We use the Moran I test to see if the pattern of Epilepsy Admissions across Victoria is clustered or random.
+gm<-moran.test(LGASz$SMR,listw = lw , na.action = na.omit, zero.policy = T)
+gm
+
+#local test of autocorrelation
+lm<-localmoran(LGASz$SMR,listw = nb2listw(LGA.nb, zero.policy = TRUE, style = "C") , na.action = na.omit, zero.policy = T)
+
+#Ordinary Least Squares. This takes into account the explanatory variable values of the LGA.
+fit.ols<-lm(SMR~GP100000+Obese, data=LGASz, listw=lw,zero.policy=T, type="lag", method="spam")
+summary(fit.ols)
+
+#SAR - The Spatial Lag Model. This takes into account the number of Epilepsy Admissions of neighbours and the explanatory variable values of the LGA itself.
+fit.lag<-lagsarlm(SMR~GP100000+Obese,data=LGASz, listw=lw,zero.policy=T, type="lag", method="spam")
+summary(fit.lag, Nagelkerke=T)
+
+#The Spatial Durbin Model. This takes into account the number of Epilepsy Admissions of neighbours and explanatory variable values of neighbours and the LGA itself.
+fit.durb<-lagsarlm(SMR~GP100000+Obese,data=LGASz, listw=lw,zero.policy=T, type="mixed", method="spam")
+summary(fit.durb, Nagelkerke=T)
+
+#The Spatial Error Model. This takes into account explanatory variable values of the LGA itself, as well as the residuals of the neighbours.
+fit.errdurb<-errorsarlm(SMR~GP100000+Obese, data=LGASz, listw=lw,zero.policy=T,etype="emixed", method="spam")
+summary(fit.errdurb, Nagelkerke=T)
+
+#The SAC or Manski Model. This takes into account the number of Epilepsy Admissions of neighbours, explanatory variable values of neighbours and the LGA itself, as well as the residuals of the neighbours.
+fit.sac<-sacsarlm(SMR~GP100000+Obese,data=LGASz, listw=lw,zero.policy=T, type="sac", method = "MC") 
+summary(fit.sac, Nagelkerke=T)
+
+
+
+```
+
+``` {r INLA GP and Obesity}
+nb2INLA("LGA.graph", LGA.nb)
+#This create a file called ``LDN-INLA.adj'' with the graph for INLA
+LGA.adj <- paste(getwd(),"/LGA.graph",sep="")
+#xpoisson model with no random latent effect-ideal baseline model
+m1<-inla(SzPublic_Number~ 1+GP100000+Obese, data=LGASz, family="xpoisson",
+         E=LGASz$Expected,control.predictor = list(compute = TRUE),
+         control.compute = list(dic = TRUE, waic = TRUE), verbose=TRUE)
+R1<-summary(m1) #
+
+LGASz$ID <- 1:nrow(LGASz)
+m2<-inla(SzPublic_Number~ 1+ GP100000+Obese +f(ID, model = "iid"), data=LGASz, family="xpoisson",
+         E=LGASz$Expected,control.predictor = list(compute = TRUE),
+         control.compute = list(dic = TRUE, waic = TRUE) )
+R2<-summary(m2)
+LGASz$FIXED.EFF <- m1$summary.fitted[, "mean"]
+LGASz$IID.EFF <- m2$summary.fitted[, "mean"]
+#plot regression on map
+tFIXED<-tm_shape(LGASz)+tm_polygons("FIXED.EFF")
+tIID<-tm_shape(LGASz)+tm_polygons("IID.EFF")
+
+# Create sparse adjacency matrix
+LGA.mat <- as(nb2mat(LGA.nb, style = "B",zero.policy = TRUE), "Matrix") #S=variance stabilise
+# Fit model
+m.icar <- inla(SzPublic_Number ~ 1+GP100000+Obese+   
+                 f(ID, model = "besag", graph = LGA.mat),
+               data = LGASz, E = LGASz$Expected, family ="xpoisson",
+               control.predictor = list(compute = TRUE),
+               control.compute = list(dic = TRUE, waic = TRUE))
+R3<-summary(m.icar)
+
+
+
+
+m.bym = inla(SzPublic_Number ~ -1+ GP100000+Obese+   
+               f(ID, model = "bym", graph = LGA.mat),
+             data = LGASz, E = LGASz$Expected, family ="xpoisson",
+             control.predictor = list(compute = TRUE),
+             control.compute = list(dic = TRUE, waic = TRUE))
+R4<-summary(m.bym)
+
+ICARmatrix <- Diagonal(nrow(LGA.mat), apply(LGA.mat, 1, sum)) - LGA.mat
+Cmatrix <- Diagonal(nrow(LGASz), 1) -  ICARmatrix
+max(eigen(Cmatrix)$values)
+m.ler = inla(SzPublic_Number ~ -1+GP100000+Obese+ 
+               f(ID, model = "generic1", Cmatrix = Cmatrix),
+             data = LGASz, E = LGASz$Expected, family ="xpoisson",
+             control.predictor = list(compute = TRUE),
+             control.compute = list(dic = TRUE, waic = TRUE))
+R5<-summary(m.ler)
+
+
+#X
+mmatrix <- model.matrix(SzPublic_Number ~ 1, LGASz)
+#W
+W <- as(nb2mat(LGA.nb, style = "W", zero.policy = TRUE), "Matrix")
+#Q
+Q.beta = Diagonal(n = ncol(mmatrix), x = 0.001)
+#Range of rho
+rho.min<- -1
+rho.max<- 1
+#Arguments for 'slm'
+args.slm = list(
+  rho.min = rho.min ,
+  rho.max = rho.max,
+  W = W,
+  X = mmatrix,
+  Q.beta = Q.beta
+)
+#Prior on rho
+hyper.slm = list(
+  prec = list(
+    prior = "loggamma", param = c(0.01, 0.01)),
+  rho = list(initial=0, prior = "logitbeta", param = c(1,1))
+)
+#SLM model
+m.slm <- inla( SzPublic_Number ~ -1+GP100000+Obese+
+                 f(ID, model = "slm", args.slm = args.slm, hyper = hyper.slm),
+               data = LGASz, family = "xpoisson",
+               E = LGASz$Expected,
+               control.predictor = list(compute = TRUE),
+               control.compute = list(dic = TRUE, waic = TRUE)
+)
+R6<-summary(m.slm)
+marg.rho.internal <- m.slm$marginals.hyperpar[["Rho for ID"]]
+marg.rho <- inla.tmarginal( function(x) {
+  rho.min + x * (rho.max - rho.min)
+}, marg.rho.internal)
+inla.zmarginal(marg.rho, FALSE)
+plot(marg.rho, type = "l", main = "Spatial autocorrelation")
+
+
+
+LGASz$ICAR <- m.icar$summary.fitted.values[, "mean"]
+LGASz$BYM <- m.bym$summary.fitted.values[, "mean"]
+LGASz$LEROUX <- m.ler$summary.fitted.values[, "mean"]
+LGASz$SLM <- m.slm$summary.fitted.values[, "mean"]
+labels<-c("Fixed","IID", "ICAR","BYM","LEROUX","SLM")
+Marginal_Likelihood<-c(R1$mlik[1],R2$mlik[1],R3$mlik[1],R4$mlik[1],R5$mlik[1],R6$mlik[1])
+Marginal_Likelihood<-round(Marginal_Likelihood,2)
+WAIC<-c(R1$waic[[1]],R2$waic[[1]],R3$waic[[1]],R4$waic[[1]],R5$waic[[1]],R6$waic[[1]])
+WAIC<-round(WAIC,2)
+DIC<-c(R1$dic[[1]],R2$dic[[1]],R3$dic[[1]],R4$dic[[1]],R5$dic[[1]],R6$dic[[1]])
+DIC<-round(DIC,2)
+Results<-data.frame(labels,Marginal_Likelihood,WAIC,DIC)
+knitr::kable(Results)
+#plot maps
+tICAR<-tm_shape(LGASz)+tm_polygons("ICAR")
+tBYM<-tm_shape(LGASz)+tm_polygons("BYM")
+tLEROUX<-tm_shape(LGASz)+tm_polygons("LEROUX")
+tSLM<-tm_shape(LGASz)+tm_polygons("SLM")
+#arrange in grid using tmap arrange
+current.mode <- tmap_mode("plot")
+tmap_arrange(tFIXED,tIID,tICAR,tBYM,tLEROUX,tSLM)
+tmap_mode(current.mode)
+
+
+```
