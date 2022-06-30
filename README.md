@@ -14,3 +14,4 @@ Criteria, such as the Deviance Information Criterion (DIC) and the Watanabe-Akai
 
 ## Data
 The shapefiles for the 2016 Local Government Areas were from the Australian Bureau of Statistics (ABS). The 2018 Median Income data for each LGA is also from the ABS. Data on epilepsy was obtained from the PHIDU website.
+![image](https://user-images.githubusercontent.com/78997343/176580204-8bcfffec-7b58-4b81-9047-997ada862a2d.png)
