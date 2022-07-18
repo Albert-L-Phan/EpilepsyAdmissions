@@ -8,13 +8,9 @@ Spatial regression uses strategies, described below, to account for this cluster
 ### INLA
 The R-INLA package can be downloaded from http://www.r-inla.org/. Integrated Nested Laplace Approximation (INLA) uses Bayesian Inference, which first finds prior distributions of parameters before considering the observed data. INLA approximates the posterior distribution of parameters by computing the likelihood of the prior distributions based on observed data.  
 
-There are different models available in the R-INLA package. In this project we used six models. The first is the baseline Fixed Effects Model which only considers explanatory variables. The second, the Mixed Effects Model considers both explanatory variables and a random Gaussian distributed component as parameters. 
+There are different models available in the R-INLA package. In this project we used six models. The first is the baseline Fixed Effects Model which only considers explanatory variables. The second model has both fixed effects as well as random effects, which is Gaussian distributed. These models assume that the number of epilepsy admissions in LGAs is spatially homogenenous. 
 
-The Besag model takes into account both the explanatory variables of each area and its neighbours. The fourth model, the Besag, York and Mollié (BYM) model, is an extension of the Besag Model. It includes the explanatory variables of each area and its neighbours and also has a a random Gaussian distributed component. 
-
-The Leroux Model 
-
-Spatial Lag Model
+In the Besag Model, neighbours are more similar to one another. The fourth model, the Besag, York and Mollié (BYM) model, is an extension of the Besag Model, as it also includes a random Gaussian distributed component. The Leroux Model combines aspects of the Besag and the BYM Models. The Spatial Lag Model takes into account the covariates and the neighbouring values of the response variable.
 
 Criteria, such as the Deviance Information Criterion (DIC) and the Watanabe-Akaike information criterion (WAIC) can be used to see which models are better. The lower the DIC and WAIC, the better the model. 
 
