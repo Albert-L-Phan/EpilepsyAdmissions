@@ -16,7 +16,7 @@ There are different models available in the R-INLA package. In this project we u
 
 The third, the Intrinsic Conditional Autoregression (ICAR) or Besag Model, has a spatial random component. The Besag, York and Mollié (BYM) model, is an extension of the Besag Model, as it has both an ICAR component and a non-spatial random component. The Leroux Model combines aspects of the Besag and the BYM Models. The Spatial Lag Model considers both the covariate values of the LGA, as well as the values of the neighbouring regions' response variable.
 
-Criteria, such as the Deviance Information Criterion (DIC) and the Watanabe-Akaike information criterion (WAIC) can be used to see which models are better. The lower the DIC and WAIC, the better the model fit. For example, the six choropleth maps below show each model predicting the standardised epilepsy admission ratio, with the number of General Practitioners in an LGA being the covariate. As the Besag, York and Mollié (BYM) model has the lowest DIC and WAIC (261.57 and 252.27, respectively), this model would be considered the best for this covariate.
+Criteria, such as the Deviance Information Criterion (DIC) and the Watanabe-Akaike information criterion (WAIC) can be used to see which models are better. The lower the DIC and WAIC, the better the model fit. For example, the six choropleth maps for Victoria below show each model predicting the standardised epilepsy admission ratio, with the number of General Practitioners in an LGA being the covariate. As the Besag, York and Mollié (BYM) model has the lowest DIC and WAIC (261.57 and 252.27, respectively), this model would be considered the best for this covariate.
 
 
 ## Data
@@ -24,4 +24,6 @@ The shapefiles for the 2016 Local Government Areas were from the Australian Bure
 
 ![image](https://user-images.githubusercontent.com/78997343/201897520-09d3281e-7dae-4e75-9fda-f56923723ce5.png)
 ![image](https://user-images.githubusercontent.com/78997343/201898762-3ce615a0-9822-49b1-a129-bdbe691c1027.png)
+
+![image](https://user-images.githubusercontent.com/78997343/202053906-2eb71584-b3fe-46e9-9223-bbb2dd548f5d.png)
 
