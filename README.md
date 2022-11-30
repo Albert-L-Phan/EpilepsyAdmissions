@@ -28,6 +28,19 @@ The shapefiles for the 2016 Local Government Areas were from the Australian Bure
 ![image](https://user-images.githubusercontent.com/78997343/202053906-2eb71584-b3fe-46e9-9223-bbb2dd548f5d.png)
 
 
+## Hospital Catchments
+The aim of this project is to construct the hospital catchments for seizure admissions in Australia. The data from PHIDU contained seizure admissions data in 2018, as well as the number of general practitioners and number of specialists in each LGA. As this data is for LGAs only, to convert the data such that it reflects the hospital catchments, a weighted average of the data for all the LGAs in the hospital catchment was performed, taking into consideration the population of each LGA. The data exists in tabular form with the number of admissions per Local Government Area (LGA) for Australia. The dataset only contains information for this year. A caveat is that there is missing data on seizure admission within the centre and Northern part of Australia. 
+
+The data on LGA comes from the Australian Bureau of Statistics (ABS). Here, each LGA is an administrative region governed by a council. The ABS provides shapefiles which outlines the borders of each LGA in Australia. The ABS updates the borders of LGAs every 5 years to reflect changes in population. This study used the shapefiles that were released in 2016. Since these shapefiles showed Australia’s population from 2016-2021, they represented the 2018 data available from PHIDU. 
+
+To construct hospital catchment areas for seizure admissions, we need to determine which hospital was closest to each LGA. We use centroids or centre of each LGA as the point to measure the distance to the hospital. This study only focused on hospitals with neurology units as not all hospitals have the same level of resources or provide the same services. From this, we constructed a distance matrix that showed the distance between each centroid and all the hospitals that had neurology units.
+
+Using the distance matrix, the closest hospital to each LGA centroid was evaluated. From there, all the LGAs that had the same hospital listed as the closest ones were grouped together and were considered as the catchment for that hospital. 
+
+
+Using this data, we then plotted choropleth maps which showed the number of seizure admissions in each hospital catchment, along with other data such as the number of general practitioners or specialists in each hospital catchment. 
+
+
 ## Formal Concept Analysis 
 Formal concept analysis enables us to find a hierarchy based on the attributes certain objects share. Before we discuss formal concept analysis, we need to define a few terms. Firstly, we need a matrix which shows the relationships between the objects and attributes. This matrix is called the formal context. This matrix shows which attributes an object has using binary notation. Secondly, a concept refers to a group of objects that share attributes in common, with no other object outside of the group having these same attributes. For each concept, there is an extent and an intent. The intent of a concept is the attributes that the objects have in common, while the extent refers to the objects in the group. In this study, the LGAs are the objects while the hospitals are the attributes. Thus, a concept is a group of LGAs that have the same hospitals in common, with the extent referring to the LGAs in the group, and the intent being the hospitals themselves.  
 
