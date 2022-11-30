@@ -27,3 +27,12 @@ The shapefiles for the 2016 Local Government Areas were from the Australian Bure
 
 ![image](https://user-images.githubusercontent.com/78997343/202053906-2eb71584-b3fe-46e9-9223-bbb2dd548f5d.png)
 
+
+##Formal Concept Analysis 
+Formal concept analysis enables us to find a hierarchy based on the attributes certain objects share. Before we discuss formal concept analysis, we need to define a few terms. Firstly, we need a matrix which shows the relationships between the objects and attributes. This matrix is called the formal context. This matrix shows which attributes an object has using binary notation. Secondly, a concept refers to a group of objects that share attributes in common, with no other object outside of the group having these same attributes. For each concept, there is an extent and an intent. The intent of a concept is the attributes that the objects have in common, while the extent refers to the objects in the group. In this study, the LGAs are the objects while the hospitals are the attributes. Thus, a concept is a group of LGAs that have the same hospitals in common, with the extent referring to the LGAs in the group, and the intent being the hospitals themselves.  
+
+Smaller concepts can be subsets of other larger concepts. For example, one group of LGAs may have the same hospital as the closest one that has an oncology unit, while another group of LGAs has a different hospital which has an oncology unit. However, both groups of LGAs have the same hospital as the closest one that has an intensive care unit. These two concepts would thus be subsets of the larger concept. In addition, this enables us to find a hierarchical relationship between the hospitals, with these two hospitals with only oncology units a level below the hospital with the intensive care unit. 
+
+To be able to find which concepts are subsets of others and determine the hierarchy of hospitals, we performed Galois derivations using the R package multiplex. From this, we showed the hierarchy of hospitals using a Hasse Diagram.  
+
+
