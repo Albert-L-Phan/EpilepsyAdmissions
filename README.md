@@ -48,4 +48,14 @@ Smaller concepts can be subsets of other larger concepts. For example, one group
 
 To be able to find which concepts are subsets of others and determine the hierarchy of hospitals, we performed Galois derivations using the R package multiplex. From this, we showed the hierarchy of hospitals using a Hasse Diagram.  
 
+Hasse Diagrams for an entire state or Australia can be difficult to intepret because of the numerous arrows showing the relationships between hospitals. Instead, we can show Hasse Diagrams for individual LGAs by subsetting the matrix to only include hospitals close to an LGA.
+
+
+![image](https://user-images.githubusercontent.com/78997343/208233792-e18afbfc-9f10-43d8-9e81-757df59c17c8.png)
+This is the Hasse Diagram for Stonnington, a local government area located in south-east metropolitan Melbourne. 
+
+
+![image](https://user-images.githubusercontent.com/78997343/208233942-df5aeeb1-8b03-4ba0-bc2f-de5cfe8a0ab7.png)
+The is the Hasse Diagram for warrnambool, a rural local government area in south west Victoria. 
+
 
