@@ -44,9 +44,9 @@ Using this data, we then plotted choropleth maps which showed the number of seiz
 ## Formal Concept Analysis 
 Formal concept analysis enables us to find a hierarchy based on the attributes certain objects share. Before we discuss formal concept analysis, we need to define a few terms. Firstly, we need a matrix which shows the relationships between the objects and attributes. This matrix is called the formal context. This matrix shows which attributes an object has using binary notation. Secondly, a concept refers to a group of objects that share attributes in common, with no other object outside of the group having these same attributes. For each concept, there is an extent and an intent. The intent of a concept is the attributes that the objects have in common, while the extent refers to the objects in the group. 
 
-In our matrix, the hospitals are the objects. In this study, we were interested in which hospitals a person with status epilepticus should go to based on where they live. Thus, we have two types of attributes which describe our objects, the hospitals. These encompass geographic aspects (whether a hospital is close to an LGA) or hospital resources (for example, whether a hospital has an intensive care unit, or whether they have a neurology unit). Thus, a concept is a group of hospitals that have the same resources and relative geographic location, with the intent referring to the LGAs and hospital resources, and the extent being the hospitals themselves.  
+In our matrix, the hospitals are the objects. In this study, we were interested in which hospitals a person with status epilepticus should go to based on where they live. Thus, we need two types of attributes which describe the hospitals. These encompass geographic aspects (whether a hospital is close to an LGA) or hospital resources (for example, whether a hospital has an intensive care unit, or whether they have a neurology unit). Thus, a concept is a group of hospitals that have the same resources and relative geographic location, with the intent referring to the resources that the hospitals have, as well as the LGAs which are close to the hospitals. The extent are the hospitals themselves.  
 
-Concepts can be subsets of other larger concepts. For example, for a particular LGA, there may be two hospitals nearby. The first only has a emergency department, while the second has both an emergency department, as well as an intensive care unit. Since the second hospital has all of the attributes of the first hospital (as well as more), the first hospital is a subset of the second hospital. 
+Concepts can be subsets of other larger concepts. For example, for a particular LGA, there may be two hospitals nearby. The first only has a emergency department, while the second has both an emergency department, as well as an intensive care unit. Since the second hospital has all of the attributes of the first hospital (as well as more), the concept that contains the first hospital is a subset of the concept that contains the second hospital. 
 
 To be able to find which concepts are subsets of others and determine the hierarchy of hospitals, we used the R package fcaR. From this, we showed the hierarchy of hospitals using a Hasse Diagram.  
 
@@ -59,13 +59,14 @@ Hasse Diagrams for an entire state or Australia can be difficult to interpret be
 For example, this is the matrix for the LGA Warrnambool. The matrix only includes three hospitals because these were the hospitals that were close to Warrnambool. The first five columns of the matrix show which resources each hospital has. The other columns show whether each hospital is close to an LGA or its neighbours (the only neighbouring LGA is Moyne). In this case, since Warrnambool is a rural LGA, we considered if a hospital is close if it is within 250 kilometres from the centre of an LGA.
 We can make a hierarchy of hospitals using this matrix. For example, South West Healthcare is a subset of Ballarat Health Services, since Ballarat Health Services has all of the attributes that South West Healthcare has. Thus, South West Healthcare would be considered a lower level compared to Ballarat Health Services. Likewise, Ballarat Health Services is a subset of University Hospital Geelong. We can show the relationships between the hospitals using the Hasse Diagram below: 
 
-![image](https://user-images.githubusercontent.com/78997343/208233942-df5aeeb1-8b03-4ba0-bc2f-de5cfe8a0ab7.png)
 The is the Hasse Diagram for Warrnambool, a rural local government area in south west Victoria. 
+![image](https://user-images.githubusercontent.com/78997343/208233942-df5aeeb1-8b03-4ba0-bc2f-de5cfe8a0ab7.png)
 
 
 
-![image](https://user-images.githubusercontent.com/78997343/208233792-e18afbfc-9f10-43d8-9e81-757df59c17c8.png)
-This is the Hasse Diagram for Stonnington, a local government area located in south-east metropolitan Melbourne. 
+This is the Hasse Diagram for the local government area Melbourne.
+![image](https://user-images.githubusercontent.com/78997343/208291392-b0bd9e70-988e-4cf9-a45f-e1799544b668.png)
+Here, Williamstown Hospital and Western Hospital have less hospital resources than Royal Melbourne Hospital (RMH), thus appear lower on the Hasse Diagram. While the Alfred and St Vincent's Hospital have the same number of resources as RMH, they appear lower because they are further away from the centre of the Melbourne LGA compared to RMH. 
 
 
 
