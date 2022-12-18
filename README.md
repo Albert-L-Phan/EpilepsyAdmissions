@@ -56,7 +56,8 @@ Hasse Diagrams for an entire state or Australia can be difficult to interpret be
 
 ![image](https://user-images.githubusercontent.com/78997343/208284645-f8fff0bd-3edf-4e42-84ce-69322ea58704.png)
 
-For example, this is the matrix for the LGA Warrnambool. The matrix only includes three hospitals because these were the hospitals that were close to Warrnambool. The first five columns of the matrix show which resources each hospital has. The other columns show whether each hospital is close to an LGA or its neighbours (the only neighbouring LGA is Moyne). In this case, since Warrnambool is a rural LGA, we considered if a hospital is close if it is within 250 kilometres from the centre of an LGA.
+For example, this is the matrix for the LGA Warrnambool. The matrix only includes three hospitals because these were the hospitals that were close to Warrnambool. The first five columns of the matrix show which resources each hospital has. The other columns show whether each hospital is close to an LGA or its neighbours (the only neighbouring LGA is Moyne).
+
 We can make a hierarchy of hospitals using this matrix. For example, South West Healthcare is a subset of Ballarat Health Services, since Ballarat Health Services has all of the attributes that South West Healthcare has. Thus, South West Healthcare would be considered a lower level compared to Ballarat Health Services. Likewise, Ballarat Health Services is a subset of University Hospital Geelong. We can show the relationships between the hospitals using the Hasse Diagram below: 
 
 The is the Hasse Diagram for Warrnambool, a rural local government area in south west Victoria. 
