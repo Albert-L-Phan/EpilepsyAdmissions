@@ -51,11 +51,18 @@ To be able to find which concepts are subsets of others and determine the hierar
 Hasse Diagrams for an entire state or Australia can be difficult to interpret because there can be many arrows showing the relationships between hospitals. Thus to simplify the Hasse diagram, we can subset the matrix to only include hospitals that are close to a singular LGA. This enables us to see which hospitals a patient living in that LGA should go to.
 
 
+![image](https://user-images.githubusercontent.com/78997343/208284645-f8fff0bd-3edf-4e42-84ce-69322ea58704.png)
+
+For example, this is the matrix for the LGA Warrnambool. The matrix only includes three hospitals because these were the hospitals that were close to Warrnambool. The first five columns of the matrix show which resources each hospital has. The other columns show whether each hospital is close to an LGA or its neighbours (the only neighbouring LGA is Moyne). In this case, since Warrnambool is a rural LGA, we considered if a hospital is close if it is within 250 kilometres from the centre of an LGA.
+We can make a hierarchy of hospitals using this matrix. For example, South West Healthcare is a subset of Ballarat Health Services, since Ballarat Health Services has all of the attributes that South West Healthcare has. Thus, South West Healthcare would be considered a lower level compared to Ballarat Health Services. Likewise, Ballarat Health Services is a subset of University Hospital Geelong. We can show the relationships between the hospitals using the Hasse Diagram below: 
+
+![image](https://user-images.githubusercontent.com/78997343/208233942-df5aeeb1-8b03-4ba0-bc2f-de5cfe8a0ab7.png)
+The is the Hasse Diagram for Warrnambool, a rural local government area in south west Victoria. 
+
+
+
 ![image](https://user-images.githubusercontent.com/78997343/208233792-e18afbfc-9f10-43d8-9e81-757df59c17c8.png)
 This is the Hasse Diagram for Stonnington, a local government area located in south-east metropolitan Melbourne. 
 
-
-![image](https://user-images.githubusercontent.com/78997343/208233942-df5aeeb1-8b03-4ba0-bc2f-de5cfe8a0ab7.png)
-The is the Hasse Diagram for warrnambool, a rural local government area in south west Victoria. 
 
 
