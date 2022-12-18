@@ -44,11 +44,14 @@ Using this data, we then plotted choropleth maps which showed the number of seiz
 ## Formal Concept Analysis 
 Formal concept analysis enables us to find a hierarchy based on the attributes certain objects share. Before we discuss formal concept analysis, we need to define a few terms. Firstly, we need a matrix which shows the relationships between the objects and attributes. This matrix is called the formal context. This matrix shows which attributes an object has using binary notation. Secondly, a concept refers to a group of objects that share attributes in common, with no other object outside of the group having these same attributes. For each concept, there is an extent and an intent. The intent of a concept is the attributes that the objects have in common, while the extent refers to the objects in the group. 
 
-In our matrix, the hospitals are the objects. In this study, we were interested in which hospitals a person with status epilepticus should go to based on where they live. Thus, there will be two types of attributes which describe our objects, the hospitals. These encompass geographic aspects (whether a hospital is close to an LGA) or hospital resources (for example, whether a hospital has an intensive care unit, or whether they have a neurology unit). 
+In our matrix, the hospitals are the objects. In this study, we were interested in which hospitals a person with status epilepticus should go to based on where they live. Thus, we have two types of attributes which describe our objects, the hospitals. These encompass geographic aspects (whether a hospital is close to an LGA) or hospital resources (for example, whether a hospital has an intensive care unit, or whether they have a neurology unit). Thus, a concept is a group of hospitals that have the same resources and relative geographic location, with the intent referring to the LGAs and hospital resources, and the extent being the hospitals themselves.  
+
+Concepts can be subsets of other larger concepts. For example, for a particular LGA, there may be two hospitals nearby. The first only has a emergency department, while the second has both an emergency department, as well as an intensive care unit. Since the second hospital has all of the attributes of the first hospital (as well as more), the first hospital is a subset of the second hospital. 
 
 To be able to find which concepts are subsets of others and determine the hierarchy of hospitals, we used the R package fcaR. From this, we showed the hierarchy of hospitals using a Hasse Diagram.  
 
 Hasse Diagrams for an entire state or Australia can be difficult to interpret because there can be many arrows showing the relationships between hospitals. Thus to simplify the Hasse diagram, we can subset the matrix to only include hospitals that are close to a singular LGA. This enables us to see which hospitals a patient living in that LGA should go to.
+
 
 
 ![image](https://user-images.githubusercontent.com/78997343/208284645-f8fff0bd-3edf-4e42-84ce-69322ea58704.png)
