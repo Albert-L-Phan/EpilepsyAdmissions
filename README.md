@@ -93,6 +93,10 @@ For the two images above, for each LGA, the nearest hospital was found. LGAs tha
 
 ![image](https://user-images.githubusercontent.com/78997343/218342779-28b6feb8-659d-4a44-a17e-244fe6203318.png)
 The region highlighted in red are the LGAs whose closest hospital can transfer patients to Monash Medical Centre. These hospitals appear lower in the hierarchy depicted in the Hasse Diagram. 
+
+![image](https://user-images.githubusercontent.com/78997343/218344757-cfe98b42-56ed-4f49-ba29-0a2f6ea688c1.png)
+Using the same method, we can find catchments for other major hospitals. This is the hospital catchment for Royal Melbourne Hospital.
+
 ## Shiny App
 Here is the link to the shiny app: https://gntem3.shinyapps.io/epilepsyadmissions/
 
