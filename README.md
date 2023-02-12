@@ -41,7 +41,7 @@ Using the distance matrix, the closest hospital to each LGA centroid was evaluat
 Using this data, we then plotted choropleth maps which showed the number of seizure admissions in each hospital catchment, along with other data such as the number of general practitioners or specialists in each hospital catchment. 
 
 
-## Formal Concept Analysis 
+## Formal Concept Analysis [Old]
 Formal concept analysis enables us to find a hierarchy based on the attributes certain objects share. Before we discuss formal concept analysis, we need to define a few terms. Firstly, we need a matrix which shows the relationships between the objects and attributes. This matrix is called the formal context. This matrix shows which attributes an object has using binary notation. Secondly, a concept refers to a group of objects that share attributes in common, with no other object outside of the group having these same attributes. For each concept, there is an extent and an intent. The intent of a concept is the attributes that the objects have in common, while the extent refers to the objects in the group. 
 
 In our matrix, the hospitals are the objects. In this study, we were interested in which hospitals a person with status epilepticus should go to based on where they live. Thus, we need two types of attributes which describe the hospitals. These encompass geographic aspects (whether a hospital is close to an LGA) or hospital resources (for example, whether a hospital has an intensive care unit, or whether they have a neurology unit). Thus, a concept is a group of hospitals that have the same resources and relative geographic location, with the intent referring to the resources that the hospitals have, as well as the LGAs which are close to the hospitals. The extent are the hospitals themselves.  
@@ -68,6 +68,12 @@ The is the Hasse Diagram for Warrnambool, a rural local government area in south
 This is the Hasse Diagram for the local government area Melbourne.
 ![image](https://user-images.githubusercontent.com/78997343/208291392-b0bd9e70-988e-4cf9-a45f-e1799544b668.png)
 Here, Williamstown Hospital and Western Hospital have less hospital resources than Royal Melbourne Hospital (RMH), thus appear lower on the Hasse Diagram. While the Alfred and St Vincent's Hospital have the same number of resources as RMH, they appear lower because they are further away from the centre of the Melbourne LGA compared to RMH. 
+
+## Formal Concept Analysis [New]
+Formal concept analysis enables us to find a hierarchy based on the attributes certain objects share. In our study, we are interested in finding a hierarchy of hospitals, as it allows us to find which larger hospitals a smaller hospital should refer patients to, as well as catchments of major hospitals. Before we discuss formal concept analysis, we need to define a few terms. Firstly, we need a matrix which shows the relationships between the objects and attributes. This matrix is called the formal context. This matrix shows which attributes an object has using binary notation. Secondly, a concept refers to a group of objects that share attributes in common, with no other object outside of the group having these same attributes. For each concept, there is an extent and an intent. The intent of a concept is the attributes that the objects have in common, while the extent refers to the objects in the group. 
+
+In our matrix the hospitals are both the objects and the attributes. A hospital is considered an attribute of another hospital if the first hospital is nearby and has resources that the second one lacks. This way, the matrix considers both hospital resources (some patients need to be transferred to hospitals with more resources for better patient management) and geographic aspects (patients should be transferred to hospitals nearby) when building the hospital hierarchy. Because hospitals are both the objects and attributes, a concept is therefore a group of higher level hospitals, and the smaller hospitals that transfer patients to them. 
+
 
 ## Shiny App
 Here is the link to the shiny app: https://gntem3.shinyapps.io/epilepsyadmissions/
