@@ -86,6 +86,14 @@ This is the Hasse diagram for a person who lives near Casey Hospital. A patient 
 ![image](https://user-images.githubusercontent.com/78997343/218306292-169f83dd-b2a7-4a2c-a1fe-e562b0690138.png)
 This shows all the hospitals that can transfer patients to Monash Medical Centre. From this, we can construct hospital catchments for major hospitals.
 
+![image](https://user-images.githubusercontent.com/78997343/218308583-c1a1f9cf-4015-468e-81fb-7291f8d4db43.png)
+![image](https://user-images.githubusercontent.com/78997343/218308628-e9d52832-33b8-4133-b7fa-d642959794eb.png)
+
+For the two images above, for each LGA, the nearest hospital was found. LGAs that had the same hospital were grouped together and considered as the catchment for that hospital. However, while Monash Medical Centre has more hospital resources than Casey Hospital, it has a smaller catchment using this method. Since Monash Medical Centre is the closest major hospital to Casey Hospital, Casey Hospital can admit patients to Monash Medical Centre. Thus, this method does not reflect the number of patients that are admitted to Monash Medical Centre, and where they are from. Hasse diagrams considers this issue by finding which hospitals are higher level.
+
+![image](https://user-images.githubusercontent.com/78997343/218308420-1207c2b2-7fe8-497c-a885-c387bc041647.png)
+Voronoi Map of the Big 4 Hospitals using euclidean distance. Not the best way to represent hospital catchments of each. 
+
 ## Shiny App
 Here is the link to the shiny app: https://gntem3.shinyapps.io/epilepsyadmissions/
 
