@@ -91,9 +91,8 @@ This shows all the hospitals that can transfer patients to Monash Medical Centre
 
 For the two images above, for each LGA, the nearest hospital was found. LGAs that had the same hospital were grouped together and considered as the catchment for that hospital. However, while Monash Medical Centre has more hospital resources than Casey Hospital, it has a smaller catchment using this method. Since Monash Medical Centre is the closest major hospital to Casey Hospital, Casey Hospital can admit patients to Monash Medical Centre. Thus, this method does not reflect the number of patients that are admitted to Monash Medical Centre, and where they are from. Hasse diagrams considers this issue by finding which hospitals are higher level.
 
-![image](https://user-images.githubusercontent.com/78997343/218308420-1207c2b2-7fe8-497c-a885-c387bc041647.png)
-Voronoi Map of the Big 4 Hospitals using euclidean distance. Not the best way to represent hospital catchments of each. 
-
+![image](https://user-images.githubusercontent.com/78997343/218342779-28b6feb8-659d-4a44-a17e-244fe6203318.png)
+The region highlighted in red are the LGAs whose closest hospital can transfer patients to Monash Medical Centre. These hospitals appear lower in the hierarchy depicted in the Hasse Diagram. 
 ## Shiny App
 Here is the link to the shiny app: https://gntem3.shinyapps.io/epilepsyadmissions/
 
