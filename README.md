@@ -13,16 +13,16 @@ To perform spatial regression, there are different libraries available in R. Thi
 
 There are different models available in the R-INLA package. In this project we used six models. The first is the baseline Fixed Effects Model, a multivariate Poisson regression model, that only considers explanatory variables. The second model has both fixed effects as well as random effects. The third, the Intrinsic Conditional Autoregression (ICAR) or Besag Model, has a spatial random component. The Besag, York and Mollié (BYM) model, is an extension of the Besag Model, as it has both an ICAR component and a non-spatial random component. The Leroux Model combines aspects of the Besag and the BYM Models. The Spatial Lag Model considers both the covariate values of the LGA, as well as the values of the neighbouring regions' response variable.
 
-Criteria, such as the Deviance Information Criterion (DIC) and the Watanabe-Akaike information criterion (WAIC) can be used to see which models are better. The lower the DIC and WAIC, the better the model fit. For example, the six choropleth maps for Victoria below show each model predicting the standardised seizure admission ratio, with the number of General Practitioners in an LGA being the covariate. As the Besag, York and Mollié (BYM) model has the lowest DIC and WAIC (261.57 and 252.27, respectively), this model would be considered the best for this covariate.
+Criteria, such as the Deviance Information Criterion (DIC) and the Watanabe-Akaike information criterion (WAIC) can be used to see which models are better. The lower the DIC and WAIC, the better the model fit. For example, the six choropleth maps for Victoria below show each model predicting the standardised seizure admission ratio, with the covariates being smoking, drinking and medium income. As the SLM model has the lowest DIC and WAIC (245.57 and 237.01, respectively), this model would be considered the best for this combination of covariates. 
 
-The six choropleth maps for Australia also have the number of General Practitioners in an LGA being the covariate. Some LGAs are not shaded in because the seizure admissions data was not available.
+The six choropleth maps for Australia also have smoking, drinking and medium income as the covariate. Some LGAs are not shaded in because the seizure admissions data was not available.
 
 
 
 ## Data
 The shapefiles for the 2016 Local Government Areas were from the Australian Bureau of Statistics (ABS). The 2018 Median Income data for each LGA is also from the ABS. Data on epilepsy was obtained from the PHIDU website.
 
-![image](https://user-images.githubusercontent.com/78997343/201897520-09d3281e-7dae-4e75-9fda-f56923723ce5.png)
+![Rplot](https://user-images.githubusercontent.com/78997343/221323586-5206f807-996b-45be-9615-daa8562b7f4c.png)
 ![image](https://user-images.githubusercontent.com/78997343/201898762-3ce615a0-9822-49b1-a129-bdbe691c1027.png)
 
 ![image](https://user-images.githubusercontent.com/78997343/202053906-2eb71584-b3fe-46e9-9223-bbb2dd548f5d.png)
