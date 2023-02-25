@@ -23,9 +23,9 @@ The six choropleth maps for Australia also have smoking, drinking and medium inc
 The shapefiles for the 2016 Local Government Areas were from the Australian Bureau of Statistics (ABS). The 2018 Median Income data for each LGA is also from the ABS. Data on epilepsy was obtained from the PHIDU website.
 
 ![Rplot](https://user-images.githubusercontent.com/78997343/221323586-5206f807-996b-45be-9615-daa8562b7f4c.png)
-![image](https://user-images.githubusercontent.com/78997343/201898762-3ce615a0-9822-49b1-a129-bdbe691c1027.png)
+![image](https://user-images.githubusercontent.com/78997343/221324609-f6de324a-da37-42c6-a5f6-05efae89d549.png)
 
-![image](https://user-images.githubusercontent.com/78997343/202053906-2eb71584-b3fe-46e9-9223-bbb2dd548f5d.png)
+![Rplot01](https://user-images.githubusercontent.com/78997343/221324949-5b1e8986-60c9-44cb-a18b-e113535d9f82.png)
 
 
 ## Hospital Catchments
