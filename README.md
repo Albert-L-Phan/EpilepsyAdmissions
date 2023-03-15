@@ -20,7 +20,9 @@ The six choropleth maps for Australia also have smoking, drinking and medium inc
 
 
 ## Data
-The shapefiles for the 2016 Local Government Areas were from the Australian Bureau of Statistics (ABS). The 2018 Median Income data for each LGA is also from the ABS. Data on epilepsy was obtained from the PHIDU website.
+The shapefiles for the 2016 Local Government Areas were from the Australian Bureau of Statistics (ABS). The 2018 Median Income data for each LGA is also from the ABS. 
+
+The 2018 Median Income data for each LGA was obtained from the ABS. All other variables used in the spatial regression analysis came from PHIDU. PHIDU obtained variables that measured access to healthcare (for example, number of GPs in each LGA) from the National Health Workforce Dataset, variables that measured health risk factors such as obesity and smoking from the National Health Survey from the Australian Bureau of Statistics (ABS), and variables that measured long term health issues such as heart disease from the 2016 ABS Consenus of Population and Housing. Epilepsy data from PHIDU was obtained from number of patient admissions to public hospitals.
 
 ![Rplot](https://user-images.githubusercontent.com/78997343/221323586-5206f807-996b-45be-9615-daa8562b7f4c.png)
 ![image](https://user-images.githubusercontent.com/78997343/221324609-f6de324a-da37-42c6-a5f6-05efae89d549.png)
