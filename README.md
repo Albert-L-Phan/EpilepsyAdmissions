@@ -18,6 +18,20 @@ Criteria, such as the Deviance Information Criterion (DIC) and the Watanabe-Akai
 The six choropleth maps for Australia also have smoking, drinking and medium income as the covariate. Some LGAs are not shaded in because the seizure admissions data was not available.
 
 
+## Genetic Algorithms
+Genetic algorithms are a machine learning method that uses Darwin’s idea of natural selection to generate an optimal solution quickly. It uses a randomly generated set of models that try to predict epilepsy prevalence. We can measure the fitness of each model by looking at their Root Mean Square Error. 
+
+Genetic algorithms create new models based off previously generated models. For example, genetic algorithms can randomly introduce new covariates into previously generated models to create new models. For example, if one previously generated model contained smoking and diabetes, we could randomly add a new covariate such that the newly generated model contains, smoking, diabetes and median income, which will affect the fitness of the model. 
+
+After generating the new models, those that have a high fitness are more likely to be kept while models produced that have a lower fitness are likely to be discarded.
+Thus, over time, as we are generating new models and only keeping those that have a high fitness, the newer models will predict the epilepsy data the best. This is how genetic algorithms find an optimal model.  
+
+An advantage of using genetic algorithms instead of finding every single combination of variables to find the optimal model is that genetic algorithm is a lot quicker. 
+
+We use the best model generated from genetic algorithms can be used for feature selection to see which combination of covariates we should use for spatial regression. 
+
+The 7 variables found from genetic algorithms were Median Age Death, Obesity, Smoking, Stroke, Diabetes, Drinking and Heart_Stroke_Vascular.
+
 
 ## Data
 The shapefiles for the 2016 Local Government Areas were from the Australian Bureau of Statistics (ABS). 
